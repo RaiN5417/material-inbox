@@ -70,7 +70,7 @@ ADRs in [docs/adr/](docs/adr/).
 Prerequisites (none of this is bundled — install once):
 
 1. [Rust](https://rustup.rs/) (stable; `rustfmt` + `clippy` components)
-2. [Node.js 20+](https://nodejs.org/)
+2. [Node.js 22.13+](https://nodejs.org/) (pnpm 11 requires it)
 3. `corepack enable` (ships pnpm with Node) or `npm i -g pnpm`
 4. [Tauri's Windows prerequisites](https://v2.tauri.app/start/prerequisites/) —
    WebView2 (preinstalled on most Windows 10/11) and the MSVC C++ build tools
