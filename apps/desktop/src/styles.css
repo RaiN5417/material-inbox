@@ -1,0 +1,514 @@
+:root {
+  color-scheme: light dark;
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+
+  --bg: #f7f7f8;
+  --bg-elevated: #ffffff;
+  --sidebar-bg: #ececef;
+  --border: rgba(0, 0, 0, 0.08);
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-text: #ffffff;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  --danger: #b91c1c;
+  --success: #15803d;
+  --radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1d21;
+    --bg-elevated: #26272c;
+    --sidebar-bg: #202126;
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #f2f2f2;
+    --muted: #9aa0ac;
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --danger: #f87171;
+    --success: #4ade80;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background: var(--bg);
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ---------- Main window ---------- */
+
+.shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 10px;
+  gap: 2px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 6px 8px 14px;
+}
+
+.brand-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.nav-item:hover:not(:disabled) {
+  background: var(--border);
+}
+
+.nav-item.active {
+  background: var(--bg-elevated);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.nav-item:disabled {
+  color: var(--muted);
+  cursor: default;
+  opacity: 0.6;
+}
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.core-status {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 8px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+.status-dot.status-ok {
+  background: var(--success);
+}
+
+.status-dot.status-error {
+  background: var(--danger);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+  max-width: 720px;
+}
+
+.panel-header h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.panel-header p {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 520px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  padding: 40px 0;
+  text-align: center;
+}
+
+.empty-state svg {
+  opacity: 0.5;
+}
+
+/* Inbox list */
+
+.file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.file-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-size {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--border);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.status-badge-pending {
+  background: rgba(37, 99, 235, 0.15);
+  color: var(--accent);
+}
+
+.status-badge-organized {
+  background: rgba(21, 128, 61, 0.15);
+  color: var(--success);
+}
+
+.status-badge-error {
+  background: rgba(185, 28, 28, 0.15);
+  color: var(--danger);
+}
+
+.status-badge-later {
+  background: var(--border);
+  color: var(--muted);
+}
+
+.btn-link {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.btn-link-danger {
+  color: var(--danger);
+}
+
+/* Temporary panel */
+
+.temporary-row {
+  flex-wrap: wrap;
+}
+
+.temporary-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.temporary-actions select {
+  font-size: 12px;
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Groups panel */
+
+.group-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 420px;
+  margin-bottom: 20px;
+  padding: 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.group-form input {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.group-form-name {
+  width: 100%;
+}
+
+.group-form-path {
+  display: flex;
+  gap: 6px;
+}
+
+.group-form-path input {
+  flex: 1;
+}
+
+.btn-primary,
+.btn-secondary {
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-text);
+  align-self: flex-start;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn-secondary {
+  background: var(--border);
+  color: var(--text);
+}
+
+.form-error {
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.group-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.group-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.group-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.group-path {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------- Floating Card ---------- */
+/* The window itself is transparent (spec section 10.1), so only this
+   element is opaque, giving a floating-panel look without a native window
+   frame/shadow. */
+
+html:has(.floating-card),
+html:has(.floating-card) body {
+  background: transparent;
+}
+
+.floating-card {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  animation: floating-card-in 200ms ease-out;
+}
+
+@keyframes floating-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.floating-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.floating-card-close {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.floating-card-close:hover {
+  background: var(--border);
+}
+
+.floating-card-filename {
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.floating-card-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.floating-card-file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.floating-card-file-list li {
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.floating-card-file-list li:nth-child(odd) {
+  background: var(--border);
+}
+
+.floating-card-actions {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.floating-card-group,
+.floating-card-later {
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.floating-card-group {
+  background: var(--border);
+  color: var(--text);
+}
+
+.floating-card-later {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.floating-card-group:disabled,
+.floating-card-later:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

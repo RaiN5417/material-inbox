@@ -1,0 +1,40 @@
+# Rust
+/target/
+**/target/
+Cargo.lock.bak
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Tauri
+apps/desktop/src-tauri/gen/
+apps/desktop/src-tauri/target/
+
+# Local data
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Env
+.env
+.env.local
+
+# Local agent/tooling state
+.claude/

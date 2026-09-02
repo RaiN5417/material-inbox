@@ -1,0 +1,107 @@
+# Download Inbox
+
+> Your Downloads folder isn't a filing cabinet.
+
+A tiny, local-first Windows utility that asks where a download belongs while
+you still remember — via a non-focus-stealing floating card, not an AI guess.
+
+- No AI
+- No cloud
+- No account
+- No background directory scanning (event-driven watcher only)
+- Every organize is undoable; nothing is ever auto-deleted
+
+Full product/technical spec (the source of truth for this repo):
+[docs/download_inbox_product_technical_spec_v0.2.md](docs/download_inbox_product_technical_spec_v0.2.md).
+
+## Status
+
+**MVP feature-complete** (milestones M0–M6 of the plan in spec section 49).
+Polish pass (M7 — README, docs, benchmarks, first release) is in progress; see
+[docs/architecture.md](docs/architecture.md) for what's still open.
+
+## What it does
+
+- Watches your Downloads folder (`notify`, event-driven — never polls) and
+  waits for a file to actually finish downloading (size/mtime stability
+  check, `.crdownload`/`.part`/`.tmp` ignored) before doing anything.
+- Pops a small, non-focus-stealing **Floating Card** at the bottom-right of
+  whichever monitor your mouse is on. One click files the download into a
+  **Group** (a destination folder), marks it **Temporary** (auto-expires
+  into a cleanup queue, never auto-deleted), or **Later** (handle it from
+  the main window instead).
+- Several files landing close together collapse into one **batch card**
+  instead of popping once per file.
+- Every move is **logged and undoable** — same-name collisions never
+  overwrite, they get `(1)`, `(2)`, ... suffixes.
+- **Temporary** files that expire land in a cleanup queue where you can keep
+  them longer, file them into a group, or send them to the Recycle Bin
+  (never a permanent delete from inside the app).
+- Lives in the system tray; closing the main window just hides it.
+
+## Why?
+
+Files land with no record of why you downloaded them. A few days later the
+context is gone, and folder-by-extension auto-sorting just moves the mess
+somewhere else. This project moves the organizing moment earlier: ask once,
+right when you still remember, instead of sorting later when you don't.
+
+## Architecture
+
+```text
+React UI (apps/desktop/src)
+        │  Tauri IPC + events
+        ▼
+Tauri / Rust core (apps/desktop/src-tauri)
+        ├── file-watcher      — OS file events, event-driven only
+        ├── download-detector — is this path a finished, operable file yet?
+        ├── event-engine      — batches ready files so 20 downloads ≠ 20 cards
+        ├── file-operations   — the only crate allowed to move/rename/trash files
+        ├── storage           — SQLite pool + migrations + repositories
+        └── domain            — pure model, no Tauri/SQLite/Windows deps
+```
+
+Details: [docs/architecture.md](docs/architecture.md) · [docs/data-model.md](docs/data-model.md) ·
+[docs/event-flow.md](docs/event-flow.md) · [docs/performance.md](docs/performance.md) ·
+ADRs in [docs/adr/](docs/adr/).
+
+## Getting started
+
+Prerequisites (none of this is bundled — install once):
+
+1. [Rust](https://rustup.rs/) (stable; `rustfmt` + `clippy` components)
+2. [Node.js 20+](https://nodejs.org/)
+3. `corepack enable` (ships pnpm with Node) or `npm i -g pnpm`
+4. [Tauri's Windows prerequisites](https://v2.tauri.app/start/prerequisites/) —
+   WebView2 (preinstalled on most Windows 10/11) and the MSVC C++ build tools
+
+Then:
+
+```bash
+pnpm install --dir apps/desktop
+pnpm --dir apps/desktop tauri dev
+```
+
+`cargo build` / `cargo test` work from the repo root against the workspace
+without touching the frontend. The app icon in `apps/desktop/src-tauri/icons/`
+is a placeholder — see the README there before a real release.
+
+## Repository layout
+
+```text
+apps/desktop/          Tauri + React UI
+crates/                domain, storage, file-watcher, download-detector,
+                        event-engine, file-operations
+migrations/            SQLite schema
+docs/                   architecture, data model, ADRs, performance, full spec
+.github/                CI, issue/PR templates
+```
+
+## Non-goals
+
+No AI classification, no OCR, no cloud sync, no team accounts, no full-disk
+organizing, no auto-delete. Full list: spec section 4.
+
+## License
+
+[MIT](LICENSE)

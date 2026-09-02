@@ -1,0 +1,69 @@
+use domain::{FileRecord, OperationStatus};
+use storage::DbPool;
+use tauri::State;
+use uuid::Uuid;
+
+/// Undoes a completed move (spec section 24): moves the file back from its
+/// destination to its original path (or a conflict-safe "(restored)" name
+/// if something else now occupies that spot), then stamps the operation
+/// `undone_at`.
+#[tauri::command]
+pub async fn undo_operation(
+    pool: State<'_, DbPool>,
+    operation_id: String,
+) -> Result<FileRecord, String> {
+    let operation_id = Uuid::parse_str(&operation_id).map_err(|err| err.to_string())?;
+
+    let operation = storage::get_operation(&pool, operation_id)
+        .await
+        .map_err(|err| err.to_string())?
+        .ok_or("operation not found")?;
+
+    if operation.status != OperationStatus::Completed {
+        return Err("only a completed operation can be undone".to_string());
+    }
+    if operation.undone_at.is_some() {
+        return Err("operation was already undone".to_string());
+    }
+
+    let destination = operation
+        .destination_path
+        .ok_or("operation has no destination path")?;
+    let original_source = operation
+        .source_path
+        .ok_or("operation has no source path")?;
+    let destination_path = std::path::PathBuf::from(&destination);
+    let original_path = std::path::PathBuf::from(&original_source);
+
+    // Preflight (spec section 35): the file we're about to move back must
+    // still be where the original operation left it.
+    if tokio::fs::metadata(&destination_path).await.is_err() {
+        return Err("the organized file is no longer at its expected location".to_string());
+    }
+
+    let restore_target = file_operations::resolve_restore_path(&original_path).await;
+
+    file_operations::execute_move(&destination_path, &restore_target)
+        .await
+        .map_err(|err| err.message)?;
+
+    storage::mark_operation_undone(&pool, operation_id)
+        .await
+        .map_err(|err| err.to_string())?;
+
+    let restore_name = restore_target
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or_default()
+        .to_string();
+    let restore_path_str = restore_target.to_string_lossy().into_owned();
+
+    storage::mark_restored(&pool, operation.file_id, &restore_name, &restore_path_str)
+        .await
+        .map_err(|err| err.to_string())?;
+
+    storage::get_file(&pool, operation.file_id)
+        .await
+        .map_err(|err| err.to_string())?
+        .ok_or_else(|| "file disappeared after being restored".to_string())
+}

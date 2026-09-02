@@ -1,0 +1,33 @@
+[package]
+name = "download-inbox"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "download_inbox_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+domain = { path = "../../../crates/domain" }
+storage = { path = "../../../crates/storage" }
+download-detector = { path = "../../../crates/download-detector" }
+event-engine = { path = "../../../crates/event-engine" }
+file-watcher = { path = "../../../crates/file-watcher" }
+file-operations = { path = "../../../crates/file-operations" }
+
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-dialog = "2"
+# tauri-plugin-autostart lands with the autostart-toggle milestone (see docs/architecture.md).
+
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+anyhow.workspace = true
+uuid.workspace = true
+chrono.workspace = true
