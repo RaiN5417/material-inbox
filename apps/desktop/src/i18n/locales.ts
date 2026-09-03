@@ -47,6 +47,26 @@ const zh = {
   "window.restore": "还原",
   "window.close": "关闭窗口",
 
+  "onboarding.step1.title": "欢迎使用 Download Inbox",
+  "onboarding.step1.body": "它会替你盯着下载文件夹,新文件一到就弹出提示,你决定它该去哪。",
+  "onboarding.step2.title": "画廊式收件箱",
+  "onboarding.step2.body":
+    "收件箱默认是瀑布画廊:改文件名、打标签、拖拽排序都能直接在卡片上操作,也可以切换成列表视图。",
+  "onboarding.step3.title": "分组 = 真实文件夹",
+  "onboarding.step3.body": "把文件拖到侧边栏的分组文件夹上,就是把它移动到那个目标目录——一键归档。",
+  "onboarding.step4.title": "标签更灵活",
+  "onboarding.step4.body":
+    "标签不会移动文件,只是贴一个标记,一个文件可以打好几个标签,点侧边栏的标签就能按标签筛选。",
+  "onboarding.step5.title": "随时可以调整",
+  "onboarding.step5.body": "语言、外观主题、监控哪些文件夹,都在左下角「设置」里,随时可以改。",
+  "onboarding.next": "下一步",
+  "onboarding.back": "上一步",
+  "onboarding.skip": "跳过",
+  "onboarding.finish": "开始使用",
+  "onboarding.dontShowAgain": "不再自动显示",
+
+  "settings.reopenOnboarding": "重新查看使用引导",
+
   "tags.title": "标签",
   "tags.description": "管理所有标签。删除一个标签会把它从所有文件上摘掉,不影响文件本身。",
   "tags.deleteConfirm": "确定删除标签「{name}」吗?",
@@ -173,6 +193,29 @@ const en: Record<keyof typeof zh, string> = {
   "window.maximize": "Maximize",
   "window.restore": "Restore",
   "window.close": "Close window",
+
+  "onboarding.step1.title": "Welcome to Download Inbox",
+  "onboarding.step1.body":
+    "It watches your download folders for you — the moment a new file lands, it lets you decide where it belongs.",
+  "onboarding.step2.title": "A gallery-style Inbox",
+  "onboarding.step2.body":
+    "The Inbox defaults to a masonry gallery: rename, tag, and drag to reorder right on the card — or switch to list view any time.",
+  "onboarding.step3.title": "Groups are real folders",
+  "onboarding.step3.body":
+    "Drag a file onto a Group folder in the sidebar and it actually moves there — one drag, filed.",
+  "onboarding.step4.title": "Tags are more flexible",
+  "onboarding.step4.body":
+    "Tags never move a file, just label it — one file can carry several, and clicking a tag in the sidebar filters by it.",
+  "onboarding.step5.title": "Adjust it any time",
+  "onboarding.step5.body":
+    "Language, appearance, and which folders get watched all live in Settings at the bottom left.",
+  "onboarding.next": "Next",
+  "onboarding.back": "Back",
+  "onboarding.skip": "Skip",
+  "onboarding.finish": "Get started",
+  "onboarding.dontShowAgain": "Don't show this again",
+
+  "settings.reopenOnboarding": "Show the tour again",
 
   "tags.title": "Tags",
   "tags.description":

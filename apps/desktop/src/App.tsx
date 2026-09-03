@@ -16,6 +16,7 @@ import type { ThemeMode } from "./theme/context";
 import { InboxGallery } from "./InboxGallery";
 import { Sidebar } from "./Sidebar";
 import { Modal } from "./Modal";
+import { Onboarding } from "./Onboarding";
 import { ContextMenu, type ContextMenuItem } from "./ContextMenu";
 import {
   CloseIcon,
@@ -33,6 +34,7 @@ import {
 } from "./icons";
 
 const SIDEBAR_COLLAPSED_KEY = "download-inbox:sidebar-collapsed";
+const ONBOARDING_DISMISSED_KEY = "onboarding_dismissed";
 
 // The OS title bar already shows the app's name and icon — repeating both in
 // an in-app topbar was pure duplication, so this bar instead names whatever
@@ -66,6 +68,7 @@ export default function App() {
   const [readyFiles, setReadyFiles] = useState<TrackedFile[]>([]);
   const [activeTagId, setActiveTagId] = useState<string | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try {
       return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1";
@@ -94,6 +97,23 @@ export default function App() {
       .then((files) => setReadyFiles(files.map((f) => ({ ...f }))))
       .catch((err) => console.error("failed to load inbox", err));
   }, []);
+
+  // First launch (or the user hasn't opted out yet): show the tour.
+  useEffect(() => {
+    invoke<string | null>("get_setting", { key: ONBOARDING_DISMISSED_KEY })
+      .then((value) => {
+        if (value !== '"true"') setOnboardingOpen(true);
+      })
+      .catch(() => {});
+  }, []);
+
+  function closeOnboarding(dontShowAgain: boolean) {
+    setOnboardingOpen(false);
+    invoke("set_setting", {
+      key: ONBOARDING_DISMISSED_KEY,
+      value: JSON.stringify(dontShowAgain),
+    }).catch(() => {});
+  }
 
   useEffect(() => {
     const unlistenReady = listen<FileRecord>("file-ready", (event) => {
@@ -229,9 +249,11 @@ export default function App() {
           {tab === "tags" && <TagsPanel />}
           {tab === "temporary" && <TemporaryPanel />}
           {tab === "history" && <HistoryPanel />}
-          {tab === "settings" && <SettingsPanel />}
+          {tab === "settings" && <SettingsPanel onOpenOnboarding={() => setOnboardingOpen(true)} />}
         </main>
       </div>
+
+      {onboardingOpen && <Onboarding onClose={closeOnboarding} />}
     </div>
   );
 }
@@ -1003,7 +1025,7 @@ function HistoryPanel() {
   );
 }
 
-function SettingsPanel() {
+function SettingsPanel({ onOpenOnboarding }: { onOpenOnboarding: () => void }) {
   const { t, locale, setLocale } = useI18n();
   const { mode, setMode } = useTheme();
   const [folders, setFolders] = useState<string[]>([]);
@@ -1095,6 +1117,12 @@ function SettingsPanel() {
         )}
         <button className="btn-secondary" disabled={folderBusy} onClick={() => void addFolder()}>
           {t("settings.addFolder")}
+        </button>
+      </div>
+
+      <div className="settings-field">
+        <button className="btn-secondary" onClick={onOpenOnboarding}>
+          {t("settings.reopenOnboarding")}
         </button>
       </div>
     </>
