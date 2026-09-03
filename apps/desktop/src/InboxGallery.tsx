@@ -9,7 +9,12 @@ import { useI18n } from "./i18n/context";
 import type { TranslationKey } from "./i18n/locales";
 import { CloseIcon, GenericFileIcon, TagIcon } from "./icons";
 
-const BREAKPOINTS = { default: 4, 1200: 3, 860: 2, 560: 1 };
+// Keyed by the masonry container's own width, not the viewport — react-
+// masonry-css measures its wrapper. `default` had been the widest tier, so
+// on a maximized ultra-wide window the gallery just stopped at 4 columns
+// and left the rest of the window blank; these extra tiers let it keep
+// adding columns as more room actually shows up.
+const BREAKPOINTS = { default: 7, 2200: 6, 1850: 5, 1500: 4, 1150: 3, 780: 2, 480: 1 };
 
 // Eagle-style masonry gallery for the Inbox: image thumbnails (base64 data
 // URIs from the Rust `get_thumbnail` command, since Tauri's asset-protocol
