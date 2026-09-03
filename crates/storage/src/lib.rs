@@ -6,15 +6,22 @@
 mod files;
 mod groups;
 mod operations;
+mod settings;
+mod tags;
 
 pub use files::{
-    assign_group, get_file, insert_file, list_temporary, mark_ready_pending, mark_restored,
-    mark_status, mark_temporary, mark_trashed, sweep_expired,
+    assign_group, find_file_by_path, get_file, insert_file, list_files_by_group, list_inbox,
+    list_temporary, mark_ready_pending, mark_restored, mark_status, mark_temporary, mark_trashed,
+    rename_file, sweep_expired,
 };
-pub use groups::{get_group, insert_group, list_groups};
+pub use groups::{delete_group, get_group, insert_group, list_groups};
 pub use operations::{
-    get_operation, insert_operation, mark_operation_completed, mark_operation_failed,
-    mark_operation_undone,
+    get_operation, insert_operation, list_operations, list_pending_operations,
+    mark_operation_completed, mark_operation_failed, mark_operation_undone,
+};
+pub use settings::{get_setting, set_setting};
+pub use tags::{
+    add_tag_to_file, create_tag, delete_tag, list_all_file_tags, list_tags, remove_tag_from_file,
 };
 
 use std::path::Path;

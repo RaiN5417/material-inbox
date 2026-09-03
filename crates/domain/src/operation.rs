@@ -74,6 +74,10 @@ pub struct Operation {
     pub operation_type: OperationType,
     pub source_path: Option<String>,
     pub destination_path: Option<String>,
+    /// Which group a `Move` was filing into, if any — lets crash
+    /// reconciliation (spec section 39) restore the file's group assignment
+    /// after an interrupted move, not just its path.
+    pub group_id: Option<Uuid>,
     pub status: OperationStatus,
     pub created_at: DateTime<Utc>,
     pub completed_at: Option<DateTime<Utc>>,

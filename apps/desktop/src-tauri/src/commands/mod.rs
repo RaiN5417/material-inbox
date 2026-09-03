@@ -1,15 +1,19 @@
+pub mod files;
+pub mod folders;
 pub mod groups;
+pub mod inbox;
 pub mod operations;
+pub mod settings;
+pub mod tags;
 pub mod temporary;
+pub mod thumbnails;
 
 use domain::FileStatus;
 use storage::DbPool;
 use tauri::State;
 use uuid::Uuid;
 
-/// Trivial IPC smoke test for the M0 skeleton. Real commands
-/// (list_inbox, ...) land with their respective milestones — see spec
-/// section 26.
+/// Trivial IPC smoke test for the M0 skeleton.
 #[tauri::command]
 pub fn ping() -> &'static str {
     "pong"

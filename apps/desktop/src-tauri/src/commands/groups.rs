@@ -45,6 +45,35 @@ pub async fn list_groups(pool: State<'_, DbPool>) -> Result<Vec<Group>, String> 
         .map_err(|err| err.to_string())
 }
 
+/// Files currently filed under a group — what the Groups panel shows once
+/// the user selects a specific group (spec section 23 has no dedicated
+/// listing for this; it's a plain filter on `group_id`).
+#[tauri::command]
+pub async fn list_group_files(
+    pool: State<'_, DbPool>,
+    group_id: String,
+) -> Result<Vec<FileRecord>, String> {
+    let group_id = Uuid::parse_str(&group_id).map_err(|err| err.to_string())?;
+    storage::list_files_by_group(&pool, group_id)
+        .await
+        .map_err(|err| err.to_string())
+}
+
+/// Fails with a friendly message if any file is still filed under this
+/// group — the DB's own foreign key is what actually enforces that; this
+/// just gives the UI something better than a raw SQLite error to show.
+#[tauri::command]
+pub async fn delete_group(pool: State<'_, DbPool>, group_id: String) -> Result<(), String> {
+    let group_id = Uuid::parse_str(&group_id).map_err(|err| err.to_string())?;
+    storage::delete_group(&pool, group_id).await.map_err(|err| {
+        if err.to_string().contains("FOREIGN KEY") {
+            "This group still has files in it — move them first.".to_string()
+        } else {
+            err.to_string()
+        }
+    })
+}
+
 /// Moves one file into a group's destination folder (spec section 23).
 ///
 /// Takes a single file rather than the `Vec<file_id>` shape spec section 26
@@ -91,6 +120,7 @@ pub async fn assign_group(
         operation_type: OperationType::Move,
         source_path: Some(source.to_string_lossy().into_owned()),
         destination_path: Some(destination.to_string_lossy().into_owned()),
+        group_id: Some(group_id),
         status: OperationStatus::Pending,
         created_at: Utc::now(),
         completed_at: None,

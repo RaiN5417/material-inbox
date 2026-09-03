@@ -3,17 +3,45 @@ use uuid::Uuid;
 
 use crate::{DbPool, StorageError};
 
+const OPERATION_COLUMNS: &str = "id, file_id, operation_type, source_path, destination_path, \
+     group_id, status, created_at, completed_at, undone_at, error_code, error_message";
+
 pub async fn get_operation(pool: &DbPool, id: Uuid) -> Result<Option<Operation>, StorageError> {
-    let row = sqlx::query_as::<_, OperationRow>(
-        "SELECT id, file_id, operation_type, source_path, destination_path, status,
-                created_at, completed_at, undone_at, error_code, error_message
-         FROM operations WHERE id = ?",
-    )
+    let row = sqlx::query_as::<_, OperationRow>(&format!(
+        "SELECT {OPERATION_COLUMNS} FROM operations WHERE id = ?"
+    ))
     .bind(id.to_string())
     .fetch_optional(pool)
     .await?;
 
     Ok(row.map(Into::into))
+}
+
+/// Most recent operations for the History view (spec section 11), newest
+/// first.
+pub async fn list_operations(pool: &DbPool, limit: i64) -> Result<Vec<Operation>, StorageError> {
+    let rows = sqlx::query_as::<_, OperationRow>(&format!(
+        "SELECT {OPERATION_COLUMNS} FROM operations ORDER BY created_at DESC LIMIT ?"
+    ))
+    .bind(limit)
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().map(Into::into).collect())
+}
+
+/// Operations still `Pending` — normally a fleeting in-memory state, so any
+/// row still in it at startup means the app crashed between logging the
+/// operation and committing its outcome (spec section 39).
+pub async fn list_pending_operations(pool: &DbPool) -> Result<Vec<Operation>, StorageError> {
+    let rows = sqlx::query_as::<_, OperationRow>(&format!(
+        "SELECT {OPERATION_COLUMNS} FROM operations WHERE status = ?"
+    ))
+    .bind(OperationStatus::Pending.as_str())
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().map(Into::into).collect())
 }
 
 /// Writes the operation as `Pending` *before* the filesystem action executes
@@ -22,15 +50,16 @@ pub async fn get_operation(pool: &DbPool, id: Uuid) -> Result<Option<Operation>,
 pub async fn insert_operation(pool: &DbPool, op: &Operation) -> Result<(), StorageError> {
     sqlx::query(
         "INSERT INTO operations (
-            id, file_id, operation_type, source_path, destination_path,
+            id, file_id, operation_type, source_path, destination_path, group_id,
             status, created_at, completed_at, undone_at, error_code, error_message
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     )
     .bind(op.id.to_string())
     .bind(op.file_id.to_string())
     .bind(op.operation_type.as_str())
     .bind(&op.source_path)
     .bind(&op.destination_path)
+    .bind(op.group_id.map(|id| id.to_string()))
     .bind(op.status.as_str())
     .bind(op.created_at.to_rfc3339())
     .bind(op.completed_at.map(|t| t.to_rfc3339()))
@@ -92,6 +121,7 @@ struct OperationRow {
     operation_type: String,
     source_path: Option<String>,
     destination_path: Option<String>,
+    group_id: Option<String>,
     status: String,
     created_at: String,
     completed_at: Option<String>,
@@ -109,6 +139,10 @@ impl From<OperationRow> for Operation {
                 .unwrap_or(OperationType::Move),
             source_path: row.source_path,
             destination_path: row.destination_path,
+            group_id: row
+                .group_id
+                .as_deref()
+                .and_then(|s| Uuid::parse_str(s).ok()),
             status: OperationStatus::parse(&row.status).unwrap_or(OperationStatus::Failed),
             created_at: crate::parse_timestamp(&row.created_at),
             completed_at: row.completed_at.as_deref().map(crate::parse_timestamp),

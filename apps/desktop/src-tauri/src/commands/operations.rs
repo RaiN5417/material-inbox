@@ -1,7 +1,12 @@
 use domain::{FileRecord, OperationStatus};
 use storage::DbPool;
-use tauri::State;
+use tauri::{AppHandle, Emitter, State};
 use uuid::Uuid;
+
+/// Emitted after a successful Undo so any open Inbox/History view can update
+/// live, whether the Undo was triggered from the Floating Card's session-only
+/// list or from History (which works on operations from any past session).
+const EVENT_FILE_RESTORED: &str = "file-restored";
 
 /// Undoes a completed move (spec section 24): moves the file back from its
 /// destination to its original path (or a conflict-safe "(restored)" name
@@ -9,6 +14,7 @@ use uuid::Uuid;
 /// `undone_at`.
 #[tauri::command]
 pub async fn undo_operation(
+    app: AppHandle,
     pool: State<'_, DbPool>,
     operation_id: String,
 ) -> Result<FileRecord, String> {
@@ -62,8 +68,12 @@ pub async fn undo_operation(
         .await
         .map_err(|err| err.to_string())?;
 
-    storage::get_file(&pool, operation.file_id)
+    let restored = storage::get_file(&pool, operation.file_id)
         .await
         .map_err(|err| err.to_string())?
-        .ok_or_else(|| "file disappeared after being restored".to_string())
+        .ok_or_else(|| "file disappeared after being restored".to_string())?;
+
+    let _ = app.emit(EVENT_FILE_RESTORED, &restored);
+
+    Ok(restored)
 }

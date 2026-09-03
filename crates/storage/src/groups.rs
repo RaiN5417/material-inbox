@@ -45,6 +45,19 @@ pub async fn get_group(pool: &DbPool, id: Uuid) -> Result<Option<Group>, Storage
     Ok(row.map(Into::into))
 }
 
+/// Fails (FK constraint) if any file's `group_id` still points at this
+/// group — the caller must move or reassign those files first. Past
+/// `operations` rows referencing this group survive with `group_id` cleared
+/// (see migrations/0002).
+pub async fn delete_group(pool: &DbPool, id: Uuid) -> Result<(), StorageError> {
+    sqlx::query("DELETE FROM groups WHERE id = ?")
+        .bind(id.to_string())
+        .execute(pool)
+        .await?;
+
+    Ok(())
+}
+
 #[derive(sqlx::FromRow)]
 struct GroupRow {
     id: String,

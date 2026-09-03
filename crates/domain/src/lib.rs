@@ -9,9 +9,11 @@ mod error;
 mod file;
 mod group;
 mod operation;
+mod tag;
 
 pub use batch::{Batch, BatchStatus};
 pub use error::{AppErrorCode, DomainError};
 pub use file::{FileRecord, FileStatus};
 pub use group::Group;
 pub use operation::{Operation, OperationStatus, OperationType};
+pub use tag::Tag;

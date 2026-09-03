@@ -84,6 +84,24 @@ pub async fn get_file(pool: &DbPool, id: Uuid) -> Result<Option<FileRecord>, Sto
     Ok(row.map(Into::into))
 }
 
+/// Looks up whichever tracked file currently sits at `path` — the watcher's
+/// external-deletion detection has nothing but the path a Remove event fired
+/// on to go by. Most-recently-seen wins on the rare chance more than one row
+/// somehow shares a path.
+pub async fn find_file_by_path(
+    pool: &DbPool,
+    path: &str,
+) -> Result<Option<FileRecord>, StorageError> {
+    let row = sqlx::query_as::<_, FileRow>(&format!(
+        "SELECT {FILE_COLUMNS} FROM files WHERE current_path = ? ORDER BY last_seen_at DESC LIMIT 1"
+    ))
+    .bind(path)
+    .fetch_optional(pool)
+    .await?;
+
+    Ok(row.map(Into::into))
+}
+
 /// Commits a successful move into a group (spec section 23): file now lives
 /// at `current_path` under `group_id`, status `Organized`.
 pub async fn assign_group(
@@ -104,6 +122,27 @@ pub async fn assign_group(
     .bind(current_name)
     .bind(current_path)
     .bind(Utc::now().to_rfc3339())
+    .bind(Utc::now().to_rfc3339())
+    .bind(file_id.to_string())
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+/// Renames a file in place (same directory, new name) — doesn't touch
+/// `status`/`group_id`, unlike `assign_group`.
+pub async fn rename_file(
+    pool: &DbPool,
+    file_id: Uuid,
+    current_name: &str,
+    current_path: &str,
+) -> Result<(), StorageError> {
+    sqlx::query(
+        "UPDATE files SET current_name = ?, current_path = ?, last_seen_at = ? WHERE id = ?",
+    )
+    .bind(current_name)
+    .bind(current_path)
     .bind(Utc::now().to_rfc3339())
     .bind(file_id.to_string())
     .execute(pool)
@@ -158,6 +197,42 @@ pub async fn mark_temporary(
     .await?;
 
     Ok(())
+}
+
+/// Files the Inbox shows: pending a decision, deferred to later, or stuck in
+/// an error/retry state (spec section 11: "Pending, Later, Failed
+/// operations"). Loaded on startup so the Inbox survives a restart instead
+/// of only reflecting the current session's live events.
+pub async fn list_inbox(pool: &DbPool) -> Result<Vec<FileRecord>, StorageError> {
+    let rows = sqlx::query_as::<_, FileRow>(&format!(
+        "SELECT {FILE_COLUMNS} FROM files WHERE status IN (?, ?, ?, ?) ORDER BY detected_at DESC"
+    ))
+    .bind(FileStatus::Pending.as_str())
+    .bind(FileStatus::Later.as_str())
+    .bind(FileStatus::Error.as_str())
+    .bind(FileStatus::PendingRetry.as_str())
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().map(Into::into).collect())
+}
+
+/// Files currently filed under a group — what the sidebar's folder view and
+/// the Groups panel show once a specific group is selected (spec section 23
+/// never persisted a listing for this; it's a plain filter on `group_id`).
+pub async fn list_files_by_group(
+    pool: &DbPool,
+    group_id: Uuid,
+) -> Result<Vec<FileRecord>, StorageError> {
+    let rows = sqlx::query_as::<_, FileRow>(&format!(
+        "SELECT {FILE_COLUMNS} FROM files WHERE group_id = ? AND status != ? ORDER BY organized_at DESC"
+    ))
+    .bind(group_id.to_string())
+    .bind(FileStatus::Trashed.as_str())
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().map(Into::into).collect())
 }
 
 /// Files the Temporary panel shows: still counting down, or expired and

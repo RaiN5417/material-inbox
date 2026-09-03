@@ -54,6 +54,7 @@ pub async fn move_to_recycle_bin(pool: State<'_, DbPool>, file_id: String) -> Re
         operation_type: OperationType::Trash,
         source_path: Some(file.current_path.clone()),
         destination_path: None,
+        group_id: None,
         status: OperationStatus::Pending,
         created_at: Utc::now(),
         completed_at: None,

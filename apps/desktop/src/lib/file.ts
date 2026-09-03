@@ -10,6 +10,19 @@ export interface FileRecord {
   expires_at?: string | null;
 }
 
+// A file plus, once known, the id of the move operation that organized it —
+// that's what Undo needs when acting from the live Inbox list/gallery.
+export interface TrackedFile extends FileRecord {
+  operationId?: string;
+}
+
+const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "gif", "webp", "bmp"]);
+
+export function isImageFile(name: string): boolean {
+  const ext = name.split(".").pop()?.toLowerCase();
+  return ext !== undefined && IMAGE_EXTENSIONS.has(ext);
+}
+
 export function formatSize(bytes: number | null): string {
   if (bytes === null) return "unknown size";
   if (bytes < 1024) return `${bytes} B`;

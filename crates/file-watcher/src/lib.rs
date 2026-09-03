@@ -35,14 +35,35 @@ pub enum WatcherError {
 
 /// Owns the OS-level watch subscription. MUST be kept alive for as long as
 /// watching should continue — dropping it silently stops the watch (the same
-/// lifetime trap as Tauri's `TrayIcon`; keep it in managed app state).
-pub struct WatcherHandle(#[allow(dead_code)] RecommendedWatcher);
+/// lifetime trap as Tauri's `TrayIcon`; keep it in managed app state). A
+/// single `notify` watcher can subscribe to multiple roots at once, so one
+/// handle covers every user-configured watched folder rather than needing
+/// one watcher instance per folder.
+pub struct WatcherHandle(RecommendedWatcher);
 
-/// Starts an event-driven, non-recursive watch on `root` (spec section 15:
-/// no polling loops). Returns the handle to keep alive alongside a channel
-/// of normalized events for the caller to consume.
+impl WatcherHandle {
+    /// Adds another folder to this watcher's live subscription — e.g. the
+    /// Settings page's "add a watched folder", without restarting the app.
+    pub fn add_path(&mut self, path: &Path) -> Result<(), WatcherError> {
+        self.0.watch(path, RecursiveMode::NonRecursive)?;
+        Ok(())
+    }
+
+    /// Stops watching a folder. Safe to call even if it was never watched
+    /// (e.g. it had already been deleted out from under the watcher) —
+    /// callers treat this as best-effort.
+    pub fn remove_path(&mut self, path: &Path) -> Result<(), WatcherError> {
+        self.0.unwatch(path)?;
+        Ok(())
+    }
+}
+
+/// Starts an event-driven, non-recursive watch on every path in `roots`
+/// (spec section 15: no polling loops). Returns the handle to keep alive
+/// alongside a channel of normalized events, tagged from whichever root
+/// they came from, for the caller to consume.
 pub fn watch(
-    root: &Path,
+    roots: &[PathBuf],
 ) -> Result<(WatcherHandle, mpsc::UnboundedReceiver<FsEvent>), WatcherError> {
     let (tx, rx) = mpsc::unbounded_channel();
 
@@ -65,7 +86,9 @@ pub fn watch(
         }
     })?;
 
-    watcher.watch(root, RecursiveMode::NonRecursive)?;
+    for root in roots {
+        watcher.watch(root, RecursiveMode::NonRecursive)?;
+    }
 
     Ok((WatcherHandle(watcher), rx))
 }

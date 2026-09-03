@@ -20,6 +20,9 @@ importers:
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
+      react-masonry-css:
+        specifier: ^1.0.16
+        version: 1.0.16(react@18.3.1)
     devDependencies:
       '@eslint/js':
         specifier: ^9.15.0
@@ -1041,6 +1044,11 @@ packages:
     peerDependencies:
       react: ^18.3.1
 
+  react-masonry-css@1.0.16:
+    resolution: {integrity: sha512-KSW0hR2VQmltt/qAa3eXOctQDyOu7+ZBevtKgpNDSzT7k5LA/0XntNa9z9HKCdz3QlxmJHglTZ18e4sX4V8zZQ==}
+    peerDependencies:
+      react: '>=16.0.0'
+
   react-refresh@0.17.0:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
     engines: {node: '>=0.10.0'}
@@ -2055,6 +2063,10 @@ snapshots:
       loose-envify: 1.4.0
       react: 18.3.1
       scheduler: 0.23.2
+
+  react-masonry-css@1.0.16(react@18.3.1):
+    dependencies:
+      react: 18.3.1
 
   react-refresh@0.17.0: {}
 

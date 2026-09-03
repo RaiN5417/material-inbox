@@ -2,6 +2,7 @@ mod app;
 mod commands;
 mod floating_card;
 mod inbox;
+mod reconciliation;
 mod temporary;
 
 pub fn run() {

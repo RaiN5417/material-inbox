@@ -4,17 +4,17 @@ import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { formatSize, type FileRecord } from "./lib/file";
 import type { Group } from "./lib/group";
+import { useI18n } from "./i18n/context";
 
 type CardState =
-  | { mode: "single"; file: FileRecord }
-  | { mode: "batch"; files: FileRecord[] }
-  | null;
+  { mode: "single"; file: FileRecord } | { mode: "batch"; files: FileRecord[] } | null;
 
 // The non-focus-stealing popup shown when one or more downloads finish
 // (spec section 9/10). Single-file and batch share this window/component —
 // event-engine on the Rust side decides which one fires (see
 // apps/desktop/src-tauri/src/floating_card.rs).
 export default function FloatingCard() {
+  const { t } = useI18n();
   const [card, setCard] = useState<CardState>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [busy, setBusy] = useState(false);
@@ -108,9 +108,15 @@ export default function FloatingCard() {
     <div className="floating-card">
       <div className="floating-card-header">
         <span>
-          {card.mode === "single" ? "↓ New download" : `↓ ${card.files.length} new files`}
+          {card.mode === "single"
+            ? t("floatingCard.newDownload")
+            : t("floatingCard.newFiles", { count: card.files.length })}
         </span>
-        <button className="floating-card-close" onClick={() => void dismiss()} aria-label="Dismiss">
+        <button
+          className="floating-card-close"
+          onClick={() => void dismiss()}
+          aria-label={t("floatingCard.dismiss")}
+        >
           ×
         </button>
       </div>
@@ -139,10 +145,10 @@ export default function FloatingCard() {
           disabled={busy}
           onClick={() => void markTemporary()}
         >
-          Temporary
+          {t("floatingCard.temporary")}
         </button>
         <button className="floating-card-later" disabled={busy} onClick={() => void markLater()}>
-          Later
+          {t("floatingCard.later")}
         </button>
       </div>
     </div>

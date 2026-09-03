@@ -24,19 +24,24 @@ use uuid::Uuid;
 
 /// Event name from spec section 26's Rust → UI event list.
 const EVENT_FILE_READY: &str = "file-ready";
+/// Emitted when a file the Inbox/Temporary panels were still showing
+/// disappeared from a watched folder for a reason the app didn't itself
+/// cause (see `handle_removed`).
+const EVENT_FILE_MISSING: &str = "file-missing";
 
 /// How long to wait before retrying a file that timed out during the
 /// stability check (spec section 20.3: "低频重试").
 const RETRY_INTERVAL: Duration = Duration::from_secs(10);
 
-/// Starts watching `downloads_dir`. Keep the returned `WatcherHandle` alive
-/// (e.g. via `app.manage`) for as long as watching should continue.
+/// Starts watching every folder in `watched_dirs`. Keep the returned
+/// `WatcherHandle` alive (e.g. via `app.manage`) for as long as watching
+/// should continue.
 pub fn start(
     app: AppHandle,
     pool: DbPool,
-    downloads_dir: PathBuf,
+    watched_dirs: Vec<PathBuf>,
 ) -> Result<WatcherHandle, WatcherError> {
-    let (handle, events) = file_watcher::watch(&downloads_dir)?;
+    let (handle, events) = file_watcher::watch(&watched_dirs)?;
 
     // event_engine::spawn() calls tokio::spawn() internally, which needs an
     // active Tokio runtime context — `start()` runs synchronously from
@@ -76,6 +81,15 @@ async fn run_event_loop(
     let in_flight: Arc<Mutex<HashSet<PathBuf>>> = Arc::new(Mutex::new(HashSet::new()));
 
     while let Some(event) = events.recv().await {
+        if event.kind == FsEventKind::Remove {
+            let app = app.clone();
+            let pool = pool.clone();
+            let path = event.path.clone();
+            tauri::async_runtime::spawn(async move {
+                handle_removed(&app, &pool, &path).await;
+            });
+            continue;
+        }
         if !matches!(event.kind, FsEventKind::Create | FsEventKind::Rename) {
             continue;
         }
@@ -198,4 +212,34 @@ async fn track_candidate(
             }
         }
     }
+}
+
+/// A file the Inbox/Temporary panels were still tracking disappeared from a
+/// watched folder. Files the app itself just moved/renamed/trashed also
+/// produce a Remove event at their old path — those already updated their
+/// own row's `current_path` (rename/organize) or `status` (recycle bin)
+/// before this async handler runs, so this only actually marks `Missing`
+/// when neither happened: a real external deletion the app didn't cause.
+async fn handle_removed(app: &AppHandle, pool: &DbPool, path: &Path) {
+    let path_str = path.to_string_lossy();
+    let Ok(Some(file)) = storage::find_file_by_path(pool, &path_str).await else {
+        return;
+    };
+    if matches!(
+        file.status,
+        FileStatus::Organized | FileStatus::Trashed | FileStatus::Missing
+    ) {
+        return;
+    }
+
+    if storage::mark_status(pool, file.id, FileStatus::Missing, None, None)
+        .await
+        .is_err()
+    {
+        return;
+    }
+
+    let mut missing = file;
+    missing.status = FileStatus::Missing;
+    let _ = app.emit(EVENT_FILE_MISSING, &missing);
 }
