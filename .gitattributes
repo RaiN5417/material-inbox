@@ -1,0 +1,18 @@
+# Normalize text files to LF everywhere so byte-embedded content (e.g.
+# sqlx::migrate!() embedding migrations/*.sql at compile time) stays
+# checksum-stable across machines and CI runners regardless of local
+# core.autocrlf settings.
+* text=auto eol=lf
+
+# Binary assets: never touch line endings.
+*.png binary
+*.ico binary
+*.icns binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.exe binary
+*.zip binary
+*.db binary
+*.sqlite binary
