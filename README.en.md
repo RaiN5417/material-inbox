@@ -21,7 +21,7 @@ Full product/technical spec (the source of truth for this repo):
 Grab the latest release from the [Releases page](https://github.com/RaiN5417/material-inbox/releases/latest) — no build tools, no manual dependencies:
 
 - **`Download-Inbox-x64-portable.zip`** — unzip and run `download-inbox.exe` directly. No install, no admin rights.
-- **`Download Inbox_x64-setup.exe`** — a normal Windows installer (Start Menu shortcut, uninstaller). Bundles the WebView2 runtime installer, so it works even if WebView2 isn't already on the machine — no separate download needed.
+- **`Download Inbox_x64-setup.exe`** — a normal Windows installer (Start Menu shortcut, uninstaller). Most Windows 10/11 machines already have WebView2 preinstalled; if yours doesn't, the installer downloads it during setup (visibly, with a progress window — not silently).
 
 Windows may show a SmartScreen warning on first run (the binary isn't code-signed yet) — click "More info" → "Run anyway".
 

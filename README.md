@@ -20,7 +20,7 @@
 去 [Releases 页面](https://github.com/RaiN5417/material-inbox/releases/latest) 下载最新版——不需要装任何构建工具或额外依赖:
 
 - **`Download-Inbox-x64-portable.zip`** —— 解压后直接运行 `download-inbox.exe`,免安装、不需要管理员权限。
-- **`Download Inbox_x64-setup.exe`** —— 普通 Windows 安装程序(开始菜单快捷方式、可卸载)。已经把 WebView2 运行时安装包打进去了,就算这台机器上没装 WebView2 也能自动装好,不用你额外去找、去装。
+- **`Download Inbox_x64-setup.exe`** —— 普通 Windows 安装程序(开始菜单快捷方式、可卸载)。大多数 Windows 10/11 系统已经预装 WebView2 运行时;如果没有,安装程序会在安装过程中联网下载(会显示进度窗口,不是静默下载)。
 
 首次运行 Windows 可能会弹 SmartScreen 警告(还没做代码签名),点"更多信息" → "仍要运行"就行。
 

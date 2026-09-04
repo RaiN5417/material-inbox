@@ -741,7 +741,7 @@ dependencies = [
 
 [[package]]
 name = "domain"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "serde",
@@ -757,7 +757,7 @@ checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
 name = "download-detector"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "thiserror 1.0.69",
@@ -767,7 +767,7 @@ dependencies = [
 
 [[package]]
 name = "download-inbox"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -900,7 +900,7 @@ dependencies = [
 
 [[package]]
 name = "event-engine"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "domain",
@@ -945,7 +945,7 @@ dependencies = [
 
 [[package]]
 name = "file-operations"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "domain",
  "thiserror 1.0.69",
@@ -956,7 +956,7 @@ dependencies = [
 
 [[package]]
 name = "file-watcher"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "notify",
@@ -3788,7 +3788,7 @@ checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 
 [[package]]
 name = "storage"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "domain",

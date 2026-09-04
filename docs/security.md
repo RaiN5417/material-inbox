@@ -4,7 +4,9 @@ Defaults (spec section 34):
 
 ```text
 No account · No cloud · No telemetry · No AI · No file upload
-Network = 0 by default
+The running app makes no network calls by default. The installer is the
+one exception: if WebView2 Runtime isn't already present on the machine,
+it downloads it during setup (visibly, not silently).
 ```
 
 ## What the local DB holds

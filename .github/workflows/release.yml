@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build, sign & publish Windows release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          # pnpm 11 requires Node >= 22.13 (uses the node:sqlite builtin).
+          node-version: 22
+          cache: pnpm
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: apps/desktop
+
+      # Tags are only pushed from commits that already passed ci.yml on
+      # main, so this job builds/signs/packages rather than re-linting.
+      - name: Build & bundle Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Windows Authenticode signing (plan section 4). These secrets
+          # don't exist yet — until a code-signing certificate is bought
+          # and WINDOWS_CERTIFICATE / WINDOWS_CERTIFICATE_PASSWORD are set
+          # in the repo's Actions secrets, tauri-bundler just skips signing
+          # and produces the same unsigned installer as today.
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        with:
+          projectPath: apps/desktop
+          tagName: ${{ github.ref_name }}
+          releaseName: "Download Inbox ${{ github.ref_name }}"
+          releaseDraft: true
+          prerelease: false
+
+      - name: Build portable zip
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          $stageDir = "portable-stage"
+          New-Item -ItemType Directory -Path $stageDir -Force | Out-Null
+          Copy-Item "target/release/download-inbox.exe" -Destination $stageDir
+          Compress-Archive -Path "$stageDir/*" -DestinationPath "Download-Inbox-$version-x64-portable.zip"
+
+      - name: Generate SHA256SUMS
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          $installer = Get-ChildItem "target/release/bundle/nsis/*.exe" | Select-Object -First 1
+          $portable = "Download-Inbox-$version-x64-portable.zip"
+          $files = @($installer.FullName, $portable)
+          $lines = foreach ($f in $files) {
+            $hash = (Get-FileHash -Path $f -Algorithm SHA256).Hash.ToLower()
+            "$hash  $(Split-Path -Leaf $f)"
+          }
+          $lines | Set-Content -Path "SHA256SUMS.txt" -Encoding utf8
+
+      - name: Upload portable zip & checksums to the release
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          gh release upload "${{ github.ref_name }}" "Download-Inbox-$version-x64-portable.zip" "SHA256SUMS.txt" --clobber
