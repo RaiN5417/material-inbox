@@ -58,7 +58,23 @@ jobs:
           projectPath: apps/desktop
           tagName: ${{ github.ref_name }}
           releaseName: "Download Inbox ${{ github.ref_name }}"
-          releaseDraft: true
+          body: |
+            Download Inbox ${{ github.ref_name }} 发布
+
+            ## 下载
+            - **Windows 安装版** (`Download.Inbox_*_x64-setup.exe`) — 推荐用户安装，会自动处理依赖
+            - **Windows 绿色版** (`Download-Inbox-*-x64-portable.zip`) — 免安装，数据存放在同目录，可直接放 U 盘运行
+
+            ## 验证完整性
+            下载后可用 SHA256SUMS.txt 验证文件未被篡改：
+            ```
+            certUtil -hashfile "Download.Inbox_*_x64-setup.exe" SHA256
+            ```
+            对比 SHA256SUMS.txt 中的值是否一致。
+
+            ## 更新日志
+            详见 GitHub 提交记录：https://github.com/${{ github.repository }}/commits/${{ github.ref_name }}
+          releaseDraft: false
           prerelease: false
 
       - name: Build portable zip
@@ -68,6 +84,16 @@ jobs:
           $stageDir = "portable-stage"
           New-Item -ItemType Directory -Path $stageDir -Force | Out-Null
           Copy-Item "target/release/download-inbox.exe" -Destination $stageDir
+          # A sibling `data/` folder is what tells the exe it's the portable
+          # build (see portable_data_dir() in apps/desktop/src-tauri/src/app.rs):
+          # its presence makes the app keep its database here instead of
+          # %APPDATA%, so the whole folder can be moved or deleted freely.
+          New-Item -ItemType Directory -Path "$stageDir/data" -Force | Out-Null
+          Set-Content -Path "$stageDir/data/READ ME.txt" -Encoding utf8 -Value @"
+This folder holds Download Inbox's portable data (database, settings).
+Keep it next to download-inbox.exe. Move the whole folder to take your
+data with you; delete the whole folder to remove all traces.
+"@
           Compress-Archive -Path "$stageDir/*" -DestinationPath "Download-Inbox-$version-x64-portable.zip"
 
       - name: Generate SHA256SUMS

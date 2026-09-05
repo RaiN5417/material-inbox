@@ -37,6 +37,10 @@
       "webviewInstallMode": {
         "type": "downloadBootstrapper",
         "silent": false
+      },
+      "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico"
       }
     }
   }
