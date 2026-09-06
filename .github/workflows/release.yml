@@ -72,6 +72,9 @@ jobs:
             ```
             对比 SHA256SUMS.txt 中的值是否一致。
 
+            ## 关于 SmartScreen 提示
+            本项目暂未购买代码签名证书，双击运行时 Windows 可能弹出"Windows 已保护你的电脑"提示——这是正常现象，不代表文件有问题。点击"更多信息" → "仍要运行"即可（可先用上面的 SHA256SUMS.txt 校验文件完整性）。
+
             ## 更新日志
             详见 GitHub 提交记录：https://github.com/${{ github.repository }}/commits/${{ github.ref_name }}
           releaseDraft: false

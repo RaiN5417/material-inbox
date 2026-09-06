@@ -32,6 +32,10 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "publisher": "Download Inbox Contributors",
+    "copyright": "Copyright © 2026 Download Inbox Contributors",
+    "homepage": "https://github.com/RaiN5417/material-inbox",
+    "shortDescription": "Downloads 文件夹不该是个杂物抽屉——本地优先的下载文件归档小工具",
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico"],
     "windows": {
       "webviewInstallMode": {
