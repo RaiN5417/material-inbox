@@ -89,11 +89,12 @@ jobs:
           # its presence makes the app keep its database here instead of
           # %APPDATA%, so the whole folder can be moved or deleted freely.
           New-Item -ItemType Directory -Path "$stageDir/data" -Force | Out-Null
-          Set-Content -Path "$stageDir/data/READ ME.txt" -Encoding utf8 -Value @"
-This folder holds Download Inbox's portable data (database, settings).
-Keep it next to download-inbox.exe. Move the whole folder to take your
-data with you; delete the whole folder to remove all traces.
-"@
+          $readmeLines = @(
+            "This folder holds Download Inbox's portable data (database, settings).",
+            "Keep it next to download-inbox.exe. Move the whole folder to take your",
+            "data with you; delete the whole folder to remove all traces."
+          )
+          Set-Content -Path "$stageDir/data/READ ME.txt" -Encoding utf8 -Value $readmeLines
           Compress-Archive -Path "$stageDir/*" -DestinationPath "Download-Inbox-$version-x64-portable.zip"
 
       - name: Generate SHA256SUMS
