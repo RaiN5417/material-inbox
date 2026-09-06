@@ -58,7 +58,7 @@ jobs:
           projectPath: apps/desktop
           tagName: ${{ github.ref_name }}
           releaseName: "Download Inbox ${{ github.ref_name }}"
-          body: |
+          releaseBody: |
             Download Inbox ${{ github.ref_name }} 发布
 
             ## 下载
