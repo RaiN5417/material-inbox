@@ -40,19 +40,31 @@ handle on its own:
    resolve identically regardless of cwd.
 
 2. **Executable name.** The tool assumes the compiled binary is named after
-   `productName` with spaces stripped (`AssetPile.exe`, approximately — see
-   below), with no config override. This project's actual Cargo binary is
-   `assetpile.exe` (from `[package] name` in `Cargo.toml`), which the
-   NSIS/MSI/portable pipeline already depends on
-   (`.github/workflows/release.yml`, autostart registration, etc.) —
-   renaming it project-wide would ripple through all of that. Instead,
-   `src-tauri/Cargo.toml` declares a second `[[bin]]` target (`AssetPile`,
-   same `src/main.rs`) purely so the MSIX tool finds the name it expects;
-   the release pipeline keeps using `assetpile.exe` unchanged. Note
-   `productName` is actually `"AssetPile｜材栈"` (with the CJK/pipe suffix)
-   — this second bin's name is only an ASCII approximation and hasn't been
-   verified against what the tool literally derives; check before relying
-   on the MSIX pipeline.
+   `productName` with spaces stripped, with no config override. This
+   project's `productName` is `"AssetPile｜材栈"` (no ASCII spaces, so the
+   stripped name is unchanged) — but Cargo bin/crate names reject the
+   CJK/pipe characters in that string (`invalid character '｜' in crate
+   name`), so there's no way to give a `[[bin]]` target that exact name.
+   The project's actual Cargo binary is `assetpile.exe` (from `[package]
+   name` in `Cargo.toml`), which the NSIS/MSI/portable pipeline already
+   depends on (`.github/workflows/release.yml`, autostart registration,
+   etc.) — renaming it project-wide would ripple through all of that.
+   Instead, `src-tauri/Cargo.toml` declares a second `[[bin]]` target
+   (`AssetPile-MSIX`, same `src/main.rs`) as a placeholder so the package
+   still builds; it is **not** the exact name the MSIX tool expects. Before
+   relying on this pipeline for real, check whether the tool needs a
+   literal `AssetPile｜材栈.exe` — if so, this needs a post-build
+   copy/rename step instead of a second bin target, since Cargo can't
+   produce that filename directly.
+
+   **Case-insensitivity trap:** whatever this second bin is named, it must
+   never case-fold to the same string as `assetpile` on Windows —
+   `cargo build`/`tauri build` compiles every `[[bin]]` target by default,
+   and Windows filesystems are case-insensitive, so e.g. an
+   `assetpile`/`AssetPile` pair both try to write the same output `.exe`
+   and the link step fails with `LNK1104: cannot open file`. This broke
+   the very first post-rename CI release build (2026-09-15) before the
+   second bin was renamed to `AssetPile-MSIX`.
 
 ## Signing
 
