@@ -9,7 +9,7 @@ Files / crates / packages touched:
 ## Design decision
 
 Anything non-obvious about the approach (see the Agent Task Template in
-docs/download_inbox_product_technical_spec_v0.2.md section 61 for the shape this should take).
+docs/assetpile_product_technical_spec_v0.2.md section 61 for the shape this should take).
 
 ## Tests
 

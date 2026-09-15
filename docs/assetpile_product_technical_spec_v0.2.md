@@ -1,4 +1,4 @@
-# Download Inbox — 产品方案与技术方案
+# AssetPile｜材栈 — 产品方案与技术方案
 > 面向 Agent / AI Coding Agent 的单文件规格说明  
 > 文档版本：v0.1  
 > 日期：2026-08-28  
@@ -759,7 +759,7 @@ MVP：
 推荐 monorepo：
 
 ```text
-download-inbox/
+assetpile/
 ├── apps/
 │   ├── desktop/
 │   │   ├── src/
@@ -1439,7 +1439,7 @@ expires_at
 托盘菜单：
 
 ```text
-Open Download Inbox
+Open AssetPile
 Pause Watching
 Inbox (6)
 Temporary (12)
@@ -1475,7 +1475,7 @@ autostart = false
 
 Onboarding 中明确询问：
 
-> Start Download Inbox with Windows?
+> Start AssetPile with Windows?
 
 用户主动开启。
 
@@ -2434,7 +2434,7 @@ RAM measured
 # 55. README 第一屏建议
 
 ```md
-# Download Inbox
+# AssetPile｜材栈
 
 > Your Downloads folder isn't a filing cabinet.
 

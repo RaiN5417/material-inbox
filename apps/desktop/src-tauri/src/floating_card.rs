@@ -39,7 +39,7 @@ struct ShowEpoch(AtomicU64);
 /// unfocused until the first file is ready.
 pub fn init(app: &AppHandle) -> tauri::Result<()> {
     WebviewWindowBuilder::new(app, WINDOW_LABEL, WebviewUrl::App("index.html".into()))
-        .title("Download Inbox")
+        .title("AssetPile｜材栈")
         .inner_size(CARD_WIDTH, SINGLE_CARD_HEIGHT)
         .decorations(false)
         .transparent(true)

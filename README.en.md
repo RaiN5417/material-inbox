@@ -1,8 +1,8 @@
 <p align="right"><a href="README.md">简体中文</a> | English</p>
 
-# Download Inbox
+# AssetPile｜材栈
 
-> Your Downloads folder isn't a filing cabinet.
+> A local-first asset manager — your Downloads folder isn't a filing cabinet.
 
 A tiny, local-first Windows utility that asks where a download belongs while
 you still remember — via a non-focus-stealing floating card, not an AI guess.
@@ -14,14 +14,14 @@ you still remember — via a non-focus-stealing floating card, not an AI guess.
 - Every organize is undoable; nothing is ever auto-deleted
 
 Full product/technical spec (the source of truth for this repo):
-[docs/download_inbox_product_technical_spec_v0.2.md](docs/download_inbox_product_technical_spec_v0.2.md).
+[docs/assetpile_product_technical_spec_v0.2.md](docs/assetpile_product_technical_spec_v0.2.md).
 
 ## Download
 
-Grab the latest release from the [Releases page](https://github.com/RaiN5417/material-inbox/releases/latest) — no build tools, no manual dependencies:
+Grab the latest release from the [Releases page](https://github.com/RaiN5417/AssetPile/releases/latest) — no build tools, no manual dependencies:
 
-- **`Download-Inbox-x64-portable.zip`** — unzip and run `download-inbox.exe` directly. No install, no admin rights.
-- **`Download Inbox_x64-setup.exe`** — a normal Windows installer (Start Menu shortcut, uninstaller). Most Windows 10/11 machines already have WebView2 preinstalled; if yours doesn't, the installer downloads it during setup (visibly, with a progress window — not silently).
+- **`AssetPile-x64-portable.zip`** — unzip and run `assetpile.exe` directly. No install, no admin rights.
+- **`AssetPile｜材栈_x64-setup.exe`** — a normal Windows installer (Start Menu shortcut, uninstaller). Most Windows 10/11 machines already have WebView2 preinstalled; if yours doesn't, the installer downloads it during setup (visibly, with a progress window — not silently).
 
 Windows may show a SmartScreen warning on first run (the binary isn't code-signed yet) — click "More info" → "Run anyway".
 
@@ -95,7 +95,7 @@ pnpm --dir apps/desktop tauri dev
 
 `cargo build` / `cargo test` work from the repo root against the workspace
 without touching the frontend. The app icon in `apps/desktop/src-tauri/icons/`
-is a placeholder — see the README there before a real release.
+is now AssetPile｜材栈's real branding.
 
 ## Repository layout
 

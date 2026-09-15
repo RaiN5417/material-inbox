@@ -10,7 +10,7 @@ spec section 32.
 - RAM: 16 GB
 - Rust: 1.98.0
 - Build: `cargo build --release` (optimized, no debug assertions)
-- Binary size: 14.6 MB (`download-inbox.exe`, unstripped)
+- Binary size: 14.6 MB (`assetpile.exe`, unstripped)
 - Date: 2026-09-02
 
 ## Idle

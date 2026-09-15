@@ -1,6 +1,6 @@
 # Architecture
 
-Full product/technical spec: [download_inbox_product_technical_spec_v0.2.md](download_inbox_product_technical_spec_v0.2.md).
+Full product/technical spec: [assetpile_product_technical_spec_v0.2.md](assetpile_product_technical_spec_v0.2.md).
 This page is the short orientation map; the spec is the source of truth when
 they disagree.
 

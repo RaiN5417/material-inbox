@@ -2,13 +2,21 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getVersion } from "@tauri-apps/api/app";
 import { open } from "@tauri-apps/plugin-dialog";
+import { open as openUrl } from "@tauri-apps/plugin-shell";
+import {
+  disable as disableAutostart,
+  enable as enableAutostart,
+  isEnabled as isAutostartEnabled,
+} from "@tauri-apps/plugin-autostart";
 import { formatRelative, formatSize, type FileRecord, type TrackedFile } from "./lib/file";
 import type { Group } from "./lib/group";
 import type { Tag } from "./lib/tag";
 import type { Tab } from "./lib/tab";
 import { FILE_DRAG_MIME, setDragPreview } from "./lib/dnd";
 import { fileNameFromPath, type Operation } from "./lib/operation";
+import { checkForUpdate, type UpdateInfo } from "./lib/update";
 import { useI18n } from "./i18n/context";
 import type { Locale, TranslationKey } from "./i18n/locales";
 import { useTheme } from "./theme/context";
@@ -33,7 +41,7 @@ import {
   TemporaryIcon,
 } from "./icons";
 
-const SIDEBAR_COLLAPSED_KEY = "download-inbox:sidebar-collapsed";
+const SIDEBAR_COLLAPSED_KEY = "assetpile:sidebar-collapsed";
 const ONBOARDING_DISMISSED_KEY = "onboarding_dismissed";
 
 // The OS title bar already shows the app's name and icon — repeating both in
@@ -1025,12 +1033,58 @@ function HistoryPanel() {
   );
 }
 
+type UpdateCheckState =
+  | { status: "idle" }
+  | { status: "checking" }
+  | { status: "upToDate" }
+  | { status: "available"; info: UpdateInfo }
+  | { status: "error" };
+
+function SettingsToggle({
+  label,
+  hint,
+  checked,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  return (
+    <div className="settings-toggle-row">
+      <div className="settings-toggle-copy">
+        <span className="settings-toggle-label">{label}</span>
+        <span className="settings-toggle-hint">{hint}</span>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        className={`switch${checked ? " on" : ""}`}
+        disabled={disabled}
+        onClick={() => onChange(!checked)}
+      />
+    </div>
+  );
+}
+
 function SettingsPanel({ onOpenOnboarding }: { onOpenOnboarding: () => void }) {
   const { t, locale, setLocale } = useI18n();
   const { mode, setMode } = useTheme();
   const [folders, setFolders] = useState<string[]>([]);
   const [folderBusy, setFolderBusy] = useState(false);
   const [folderError, setFolderError] = useState<string | null>(null);
+
+  const [minimizeOnClose, setMinimizeOnClose] = useState(true);
+  const [silentStart, setSilentStart] = useState(false);
+  const [autostart, setAutostart] = useState(false);
+  const [autostartError, setAutostartError] = useState<string | null>(null);
+  const [autoCheckUpdate, setAutoCheckUpdate] = useState(true);
+  const [updateCheck, setUpdateCheck] = useState<UpdateCheckState>({ status: "idle" });
 
   function refreshFolders() {
     invoke<string[]>("list_watched_folders")
@@ -1039,6 +1093,77 @@ function SettingsPanel({ onOpenOnboarding }: { onOpenOnboarding: () => void }) {
   }
 
   useEffect(refreshFolders, []);
+
+  async function runUpdateCheck() {
+    setUpdateCheck({ status: "checking" });
+    try {
+      const info = await checkForUpdate(await getVersion());
+      setUpdateCheck(info ? { status: "available", info } : { status: "upToDate" });
+    } catch (err) {
+      console.error("update check failed", err);
+      setUpdateCheck({ status: "error" });
+    }
+  }
+
+  useEffect(() => {
+    invoke<string | null>("get_setting", { key: "minimizeOnClose" })
+      .then((value) => {
+        if (value !== null) setMinimizeOnClose(JSON.parse(value) as boolean);
+      })
+      .catch(() => {});
+    invoke<string | null>("get_setting", { key: "silentStart" })
+      .then((value) => {
+        if (value !== null) setSilentStart(JSON.parse(value) as boolean);
+      })
+      .catch(() => {});
+    isAutostartEnabled()
+      .then(setAutostart)
+      .catch(() => {});
+    invoke<string | null>("get_setting", { key: "autoCheckUpdate" })
+      .then((value) => {
+        const enabled = value === null ? true : (JSON.parse(value) as boolean);
+        setAutoCheckUpdate(enabled);
+        if (enabled) void runUpdateCheck();
+      })
+      .catch(() => {});
+  }, []);
+
+  function updateMinimizeOnClose(next: boolean) {
+    setMinimizeOnClose(next);
+    invoke("set_setting", { key: "minimizeOnClose", value: JSON.stringify(next) }).catch(() => {});
+  }
+
+  function updateSilentStart(next: boolean) {
+    setSilentStart(next);
+    invoke("set_setting", { key: "silentStart", value: JSON.stringify(next) }).catch(() => {});
+  }
+
+  async function updateAutostart(next: boolean) {
+    setAutostartError(null);
+    setAutostart(next);
+    try {
+      if (next) await enableAutostart();
+      else await disableAutostart();
+    } catch (err) {
+      setAutostart(!next);
+      setAutostartError(String(err));
+    }
+  }
+
+  function updateAutoCheckUpdate(next: boolean) {
+    setAutoCheckUpdate(next);
+    invoke("set_setting", { key: "autoCheckUpdate", value: JSON.stringify(next) }).catch(() => {});
+    if (next) void runUpdateCheck();
+    else setUpdateCheck({ status: "idle" });
+  }
+
+  async function viewUpdate(url: string) {
+    try {
+      await openUrl(url);
+    } catch (err) {
+      console.error("failed to open update url", err);
+    }
+  }
 
   async function addFolder() {
     if (folderBusy) return;
@@ -1089,6 +1214,54 @@ function SettingsPanel({ onOpenOnboarding }: { onOpenOnboarding: () => void }) {
           <option value="light">{t("settings.themeLight")}</option>
           <option value="dark">{t("settings.themeDark")}</option>
         </select>
+      </div>
+
+      <div className="settings-field settings-field-wide">
+        <SettingsToggle
+          label={t("settings.minimizeOnClose")}
+          hint={t("settings.minimizeOnCloseHint")}
+          checked={minimizeOnClose}
+          onChange={updateMinimizeOnClose}
+        />
+        <SettingsToggle
+          label={t("settings.autostart")}
+          hint={t("settings.autostartHint")}
+          checked={autostart}
+          onChange={(next) => void updateAutostart(next)}
+        />
+        <SettingsToggle
+          label={t("settings.silentStart")}
+          hint={t("settings.silentStartHint")}
+          checked={silentStart}
+          onChange={updateSilentStart}
+        />
+        <SettingsToggle
+          label={t("settings.autoCheckUpdate")}
+          hint={t("settings.autoCheckUpdateHint")}
+          checked={autoCheckUpdate}
+          onChange={updateAutoCheckUpdate}
+        />
+        {autostartError && <p className="form-error">{autostartError}</p>}
+        <div className="update-status">
+          {updateCheck.status === "checking" && <span>{t("settings.checkingForUpdates")}</span>}
+          {updateCheck.status === "upToDate" && <span>{t("settings.upToDate")}</span>}
+          {updateCheck.status === "error" && <span>{t("settings.updateCheckFailed")}</span>}
+          {updateCheck.status === "available" && (
+            <>
+              <span className="update-status-available">
+                {t("settings.updateAvailable", { version: updateCheck.info.version })}
+              </span>
+              <button className="btn-link" onClick={() => void viewUpdate(updateCheck.info.url)}>
+                {t("settings.viewUpdate")}
+              </button>
+            </>
+          )}
+          {updateCheck.status !== "checking" && (
+            <button className="btn-link" onClick={() => void runUpdateCheck()}>
+              {t("settings.checkForUpdates")}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="settings-field settings-field-wide">

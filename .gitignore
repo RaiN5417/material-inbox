@@ -10,7 +10,7 @@ dist/
 *.tsbuildinfo
 
 # Tauri
-apps/desktop/src-tauri/gen/
+apps/desktop/src-tauri/gen/schemas/
 apps/desktop/src-tauri/target/
 
 # Local data

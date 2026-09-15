@@ -7,11 +7,33 @@ use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
 
 use crate::commands;
 
+/// Whether the close button hides the main window (spec section 28's
+/// default) instead of quitting. Toggled from the Settings page.
+const SETTING_MINIMIZE_ON_CLOSE: &str = "minimizeOnClose";
+/// Whether the main window starts hidden (tray-only) instead of shown.
+const SETTING_SILENT_START: &str = "silentStart";
+
+/// Reads a boolean setting, falling back to `default` if it's unset,
+/// unreadable, or not valid JSON — Settings is best-effort, never a reason
+/// to fail startup or a window-close.
+fn setting_bool(pool: &storage::DbPool, key: &str, default: bool) -> bool {
+    tauri::async_runtime::block_on(storage::get_setting(pool, key))
+        .ok()
+        .flatten()
+        .and_then(|raw| serde_json::from_str::<bool>(&raw).ok())
+        .unwrap_or(default)
+}
+
 /// Builds the Tauri app: DB init, crash reconciliation, downloads watcher
 /// startup, Floating Card window, system tray, and hide-to-tray on close.
 pub fn build() -> tauri::Builder<tauri::Wry> {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
         .invoke_handler(tauri::generate_handler![
             commands::ping,
             commands::mark_later,
@@ -48,20 +70,20 @@ pub fn build() -> tauri::Builder<tauri::Wry> {
                 None => app.path().app_data_dir()?,
             };
             std::fs::create_dir_all(&data_dir)?;
-            let db_path = data_dir.join("download-inbox.sqlite");
+            let db_path = data_dir.join("assetpile.sqlite");
 
             let pool = match tauri::async_runtime::block_on(storage::init_db(&db_path)) {
                 Ok(pool) => pool,
                 Err(err) => {
                     tracing::error!(?err, "failed to open database");
                     let detail = if matches!(err, storage::StorageError::Migrate(_)) {
-                        "本地数据库是由更新版本的 Download Inbox 创建的,与当前安装的版本不兼容。\n请安装最新版本后重试。"
+                        "本地数据库是由更新版本的 AssetPile｜材栈 创建的,与当前安装的版本不兼容。\n请安装最新版本后重试。"
                     } else {
                         "无法打开本地数据库,请重启程序;如果问题持续出现,请重新安装。"
                     };
                     app.dialog()
                         .message(format!("{detail}\n\n{err}"))
-                        .title("Download Inbox 无法启动")
+                        .title("AssetPile｜材栈 无法启动")
                         .kind(MessageDialogKind::Error)
                         .blocking_show();
                     std::process::exit(1);
@@ -75,6 +97,7 @@ pub fn build() -> tauri::Builder<tauri::Wry> {
 
             let watcher_pool = pool.clone();
             let sweep_pool = pool.clone();
+            let settings_pool = pool.clone();
             app.manage(pool);
 
             tauri::async_runtime::spawn(crate::temporary::run(app.handle().clone(), sweep_pool));
@@ -118,7 +141,7 @@ pub fn build() -> tauri::Builder<tauri::Wry> {
             crate::floating_card::init(app.handle())?;
 
             let open_item =
-                MenuItem::with_id(app, "open", "Open Download Inbox", true, None::<&str>)?;
+                MenuItem::with_id(app, "open", "Open AssetPile", true, None::<&str>)?;
             let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let tray_menu = Menu::with_items(app, &[&open_item, &quit_item])?;
 
@@ -143,13 +166,26 @@ pub fn build() -> tauri::Builder<tauri::Wry> {
             app.manage(tray_icon);
 
             if let Some(window) = app.get_webview_window("main") {
+                // The window is created hidden (tauri.conf.json) so "silent start"
+                // can skip showing it at all rather than flashing it open and
+                // immediately hiding it.
+                if !setting_bool(&settings_pool, SETTING_SILENT_START, false) {
+                    let _ = window.show();
+                }
+
                 let window_handle = window.clone();
+                let app_handle = app.handle().clone();
                 window.on_window_event(move |event| {
                     if let WindowEvent::CloseRequested { api, .. } = event {
-                        // Quit is only reachable from the tray menu, per spec section 28:
-                        // closing the main window hides it and keeps the core running.
-                        api.prevent_close();
-                        let _ = window_handle.hide();
+                        // Spec section 28's default: closing the main window hides it
+                        // and keeps the core running, only the tray's Quit really exits.
+                        // With the setting off, the close button quits like a normal app.
+                        if setting_bool(&settings_pool, SETTING_MINIMIZE_ON_CLOSE, true) {
+                            api.prevent_close();
+                            let _ = window_handle.hide();
+                        } else {
+                            app_handle.exit(0);
+                        }
                     }
                 });
             }

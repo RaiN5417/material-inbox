@@ -1,5 +1,5 @@
--- Initial schema for Download Inbox.
--- See docs/data-model.md and docs/download_inbox_product_technical_spec_v0.2.md section 19.
+-- Initial schema for AssetPile.
+-- See docs/data-model.md and docs/assetpile_product_technical_spec_v0.2.md section 19.
 
 CREATE TABLE groups (
     id TEXT PRIMARY KEY,

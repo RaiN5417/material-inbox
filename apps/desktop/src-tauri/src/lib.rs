@@ -8,5 +8,5 @@ mod temporary;
 pub fn run() {
     app::build()
         .run(tauri::generate_context!())
-        .expect("error while running Download Inbox");
+        .expect("error while running AssetPile");
 }

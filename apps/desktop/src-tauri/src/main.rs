@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    download_inbox_lib::run();
+    assetpile_lib::run();
 }

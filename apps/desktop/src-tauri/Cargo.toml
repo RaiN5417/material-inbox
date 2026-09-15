@@ -1,12 +1,28 @@
 [package]
-name = "download-inbox"
+name = "assetpile"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [lib]
-name = "download_inbox_lib"
+name = "assetpile_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
+
+# Two bin targets sharing src/main.rs: "assetpile" is the real
+# NSIS/MSI/portable release binary, "AssetPile" is the PascalCase name the
+# MSIX packaging tool (@choochmeque/tauri-windows-bundle) expects for its
+# executable (it derives the name from productName with spaces stripped and
+# doesn't offer an override — see apps/desktop's tauri:windows:build script
+# and gen/windows/bundle.config.json). productName is now "AssetPile｜材栈",
+# so this approximation may need re-checking against whatever the MSIX tool
+# actually derives before that pipeline is used for real.
+[[bin]]
+name = "assetpile"
+path = "src/main.rs"
+
+[[bin]]
+name = "AssetPile"
+path = "src/main.rs"
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
@@ -21,7 +37,8 @@ file-operations = { path = "../../../crates/file-operations" }
 
 tauri = { version = "2", features = ["tray-icon"] }
 tauri-plugin-dialog = "2"
-# tauri-plugin-autostart lands with the autostart-toggle milestone (see docs/architecture.md).
+tauri-plugin-autostart = "2"
+tauri-plugin-shell = "2"
 
 tokio.workspace = true
 serde.workspace = true

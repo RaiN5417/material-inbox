@@ -2,9 +2,8 @@
 
 `source-icon.png` and the generated set (`icon.ico`, `32x32.png`, `128x128.png`,
 `128x128@2x.png`, `icon.png`, `icon.icns`, `Square*Logo.png`, `StoreLogo.png`)
-are a **placeholder** — a plain blue rounded square with a download-into-tray
-glyph, generated so the app actually builds. Swap them for real branding
-before shipping a release.
+are AssetPile｜材栈's real branding, generated from the official logo with
+`pnpm tauri icon`.
 
 To regenerate from a new 1024x1024 source PNG:
 

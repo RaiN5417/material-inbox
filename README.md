@@ -1,8 +1,8 @@
 <p align="right">简体中文 | <a href="README.en.md">English</a></p>
 
-# Download Inbox
+# AssetPile｜材栈
 
-> Downloads 文件夹不该是个杂物抽屉。
+> 本地素材管理器——Downloads 文件夹不该是个杂物抽屉。
 
 一个极轻量、本地优先的 Windows 小工具:在文件刚下载完成、你还记得它是干什么的时候,弹出一张不抢焦点的悬浮卡片,让你一秒决定它该去哪——不是靠 AI 猜。
 
@@ -13,14 +13,14 @@
 - 每一次归档都可撤销;任何时候都不会自动永久删除文件
 
 完整的产品/技术方案(本仓库的权威依据):
-[docs/download_inbox_product_technical_spec_v0.2.md](docs/download_inbox_product_technical_spec_v0.2.md)。
+[docs/assetpile_product_technical_spec_v0.2.md](docs/assetpile_product_technical_spec_v0.2.md)。
 
 ## 下载
 
-去 [Releases 页面](https://github.com/RaiN5417/material-inbox/releases/latest) 下载最新版——不需要装任何构建工具或额外依赖:
+去 [Releases 页面](https://github.com/RaiN5417/AssetPile/releases/latest) 下载最新版——不需要装任何构建工具或额外依赖:
 
-- **`Download-Inbox-x64-portable.zip`** —— 解压后直接运行 `download-inbox.exe`,免安装、不需要管理员权限。
-- **`Download Inbox_x64-setup.exe`** —— 普通 Windows 安装程序(开始菜单快捷方式、可卸载)。大多数 Windows 10/11 系统已经预装 WebView2 运行时;如果没有,安装程序会在安装过程中联网下载(会显示进度窗口,不是静默下载)。
+- **`AssetPile-x64-portable.zip`** —— 解压后直接运行 `assetpile.exe`,免安装、不需要管理员权限。
+- **`AssetPile｜材栈_x64-setup.exe`** —— 普通 Windows 安装程序(开始菜单快捷方式、可卸载)。大多数 Windows 10/11 系统已经预装 WebView2 运行时;如果没有,安装程序会在安装过程中联网下载(会显示进度窗口,不是静默下载)。
 
 首次运行 Windows 可能会弹 SmartScreen 警告(还没做代码签名),点"更多信息" → "仍要运行"就行。
 
@@ -80,7 +80,7 @@ pnpm --dir apps/desktop tauri dev
 ```
 
 `cargo build` / `cargo test` 在仓库根目录直接对整个 workspace 生效,不需要碰前端。
-`apps/desktop/src-tauri/icons/` 里的图标目前是占位图——正式发布前看一下那里的 README。
+`apps/desktop/src-tauri/icons/` 里已经换上了 AssetPile｜材栈 的正式图标。
 
 ## 仓库结构
 

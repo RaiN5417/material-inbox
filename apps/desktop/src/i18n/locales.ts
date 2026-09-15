@@ -7,7 +7,7 @@ export const DEFAULT_LOCALE: Locale = "zh";
 // enough that react-i18next's feature set — plurals, interpolation engines,
 // lazy-loaded namespace bundles — would mostly go unused).
 const zh = {
-  "app.title": "Download Inbox",
+  "app.title": "AssetPile｜材栈",
   "nav.inbox": "收件箱",
   "nav.groups": "分组",
   "nav.temporary": "临时文件",
@@ -47,7 +47,7 @@ const zh = {
   "window.restore": "还原",
   "window.close": "关闭窗口",
 
-  "onboarding.step1.title": "欢迎使用 Download Inbox",
+  "onboarding.step1.title": "欢迎使用 AssetPile｜材栈",
   "onboarding.step1.body": "它会替你盯着下载文件夹,新文件一到就弹出提示,你决定它该去哪。",
   "onboarding.step2.title": "画廊式收件箱",
   "onboarding.step2.body":
@@ -115,6 +115,22 @@ const zh = {
   "settings.noWatchedFolders": "还没有监控任何文件夹。",
   "settings.addFolder": "添加文件夹…",
 
+  "settings.minimizeOnClose": "退出时最小化",
+  "settings.minimizeOnCloseHint": "修改系统默认退出事件",
+  "settings.autostart": "自启动",
+  "settings.autostartHint": "跟随系统自启动",
+  "settings.autostartError": "自启动设置失败,请检查系统权限。",
+  "settings.silentStart": "静默启动",
+  "settings.silentStartHint": "后台启动",
+  "settings.autoCheckUpdate": "自动检查更新",
+  "settings.autoCheckUpdateHint": "启动时自动检查新版本",
+  "settings.checkForUpdates": "检查更新",
+  "settings.checkingForUpdates": "检查中…",
+  "settings.upToDate": "已是最新版本",
+  "settings.updateAvailable": "发现新版本 {version}",
+  "settings.updateCheckFailed": "检查更新失败,请稍后重试。",
+  "settings.viewUpdate": "查看更新",
+
   "common.undo": "撤销",
   "common.cancel": "取消",
   "common.save": "保存",
@@ -154,7 +170,7 @@ const zh = {
 } as const;
 
 const en: Record<keyof typeof zh, string> = {
-  "app.title": "Download Inbox",
+  "app.title": "AssetPile",
   "nav.inbox": "Inbox",
   "nav.groups": "Groups",
   "nav.temporary": "Temporary",
@@ -194,7 +210,7 @@ const en: Record<keyof typeof zh, string> = {
   "window.restore": "Restore",
   "window.close": "Close window",
 
-  "onboarding.step1.title": "Welcome to Download Inbox",
+  "onboarding.step1.title": "Welcome to AssetPile",
   "onboarding.step1.body":
     "It watches your download folders for you — the moment a new file lands, it lets you decide where it belongs.",
   "onboarding.step2.title": "A gallery-style Inbox",
@@ -268,6 +284,22 @@ const en: Record<keyof typeof zh, string> = {
     "The app watches these folders live for new files; a file deleted from one outside the app is also reflected in Inbox/Temporary.",
   "settings.noWatchedFolders": "No folders being watched yet.",
   "settings.addFolder": "Add folder…",
+
+  "settings.minimizeOnClose": "Minimize on close",
+  "settings.minimizeOnCloseHint": "Overrides the OS default close behavior",
+  "settings.autostart": "Start with system",
+  "settings.autostartHint": "Launch automatically when you log in",
+  "settings.autostartError": "Couldn't change autostart — check system permissions.",
+  "settings.silentStart": "Silent start",
+  "settings.silentStartHint": "Start in the background",
+  "settings.autoCheckUpdate": "Check for updates automatically",
+  "settings.autoCheckUpdateHint": "Check for a new version on launch",
+  "settings.checkForUpdates": "Check for updates",
+  "settings.checkingForUpdates": "Checking…",
+  "settings.upToDate": "You're up to date",
+  "settings.updateAvailable": "Version {version} is available",
+  "settings.updateCheckFailed": "Couldn't check for updates — try again later.",
+  "settings.viewUpdate": "View update",
 
   "common.undo": "Undo",
   "common.cancel": "Cancel",

@@ -1,6 +1,6 @@
 # Security Policy
 
-Download Inbox is local-first: no account, no cloud, no telemetry, no AI. See
+AssetPile｜材栈 is local-first: no account, no cloud, no telemetry, no AI. See
 [docs/security.md](docs/security.md) for what the local database holds and
 how file operations are kept safe.
 

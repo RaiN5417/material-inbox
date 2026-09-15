@@ -1,4 +1,4 @@
-//! Pure domain model for Download Inbox.
+//! Pure domain model for AssetPile.
 //!
 //! This crate MUST NOT depend on Tauri, SQLite, or any Windows API — see
 //! docs/architecture.md. It only describes the shapes and state machine

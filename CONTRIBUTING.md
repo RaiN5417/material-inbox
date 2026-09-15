@@ -1,8 +1,8 @@
 # Contributing
 
-Thanks for looking at Download Inbox. This is an open-source portfolio
+Thanks for looking at AssetPile｜材栈. This is an open-source portfolio
 project with a fairly opinionated spec — read
-[docs/download_inbox_product_technical_spec_v0.2.md](docs/download_inbox_product_technical_spec_v0.2.md)
+[docs/assetpile_product_technical_spec_v0.2.md](docs/assetpile_product_technical_spec_v0.2.md)
 section 0 before proposing anything non-trivial; it lists the MUST/MUST NOT
 constraints (no AI, no cloud, no telemetry, Windows-first, event-driven
 watcher, etc.) and they're not up for debate per-PR.

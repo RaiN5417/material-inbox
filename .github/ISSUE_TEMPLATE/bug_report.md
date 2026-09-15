@@ -17,7 +17,7 @@ What you expected to happen instead.
 
 **Environment**
 - OS / Windows version:
-- Download Inbox version:
+- AssetPile｜材栈 version:
 - Watched folder on OneDrive / network drive? (y/n):
 
 **Logs**

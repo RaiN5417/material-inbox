@@ -3,7 +3,7 @@ import type { DragEvent } from "react";
 // Shared drag payload key so a card in the Inbox (gallery or list view) can
 // be dropped onto a Group folder in the sidebar — both sides need to agree
 // on the same custom MIME type.
-export const FILE_DRAG_MIME = "application/x-download-inbox-file-id";
+export const FILE_DRAG_MIME = "application/x-assetpile-file-id";
 
 // The browser's default drag image is a full snapshot of the dragged
 // element (an entire gallery card, semi-transparent) — heavy and hard to

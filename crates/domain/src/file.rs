@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::AppErrorCode;
 
-/// Full lifecycle of a tracked file. See docs/download_inbox_product_technical_spec_v0.2.md
+/// Full lifecycle of a tracked file. See docs/assetpile_product_technical_spec_v0.2.md
 /// section 13 for the state machine this enum implements.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
